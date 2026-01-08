@@ -1,13 +1,19 @@
 CC = gcc
-CFLAGS = -Wall -g
+CFLAGS = -Wall -g -Iinclude
+SRC = src/main.c src/csv.c
+OBJ = main.o csv.o
+TARGET = project.exe
 
-OBJ = main.o csv.o stats.o preprocess.o model.o
+all: $(TARGET)
 
-project.exe: $(OBJ)
-	$(CC) $(OBJ) -o project.exe
+$(TARGET): $(OBJ)
+	$(CC) $(OBJ) -o $(TARGET)
 
-%.o: %.c
-	$(CC) $(CFLAGS) -c $<
+main.o: src/main.c
+	$(CC) $(CFLAGS) -c src/main.c
+
+csv.o: src/csv.c
+	$(CC) $(CFLAGS) -c src/csv.c
 
 clean:
-	del *.o project.exe
+	del *.o *.exe
