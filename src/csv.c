@@ -72,11 +72,19 @@ CSV *load_csv(const char *filename)
         csv->data = realloc(csv->data, (csv->rows + 1) * sizeof(char **));
         csv->data[csv->rows] = malloc(csv->cols * sizeof(char *));
 
-        token = strtok(line, ","); // Split char
+        token = strtok(line, ",\n\r");
+
         for (int j = 0; j < csv->cols; j++)
         {
-            csv->data[csv->rows][j] = strdup(token); // Create copy from 'token' (It's important)
-            token = strtok(NULL, ",");               // Next step...
+            if (token)
+            {
+                csv->data[csv->rows][j] = strdup(token);
+                token = strtok(NULL, ",\n\r");
+            }
+            else
+            {
+                csv->data[csv->rows][j] = strdup("");
+            }
         }
 
         csv->rows++;

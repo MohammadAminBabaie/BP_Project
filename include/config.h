@@ -3,7 +3,7 @@
 
 #define PROJECT_DATA_PATH "data/"
 
-#define CSV_INPUT_FILE PROJECT_DATA_PATH "raw/housing.csv"
-#define CSV_OUTPUT_FILE PROJECT_DATA_PATH "processed/output.csv"
+#define CSV_INPUT_FILE PROJECT_DATA_PATH "raw/input.csv"
+#define CSV_OUTPUT_FILE PROJECT_DATA_PATH "processed/processed.csv"
 
 #endif
