@@ -2,3 +2,5 @@
 *.exe
 build/
 .vscode/
+plots/
+data/processed/

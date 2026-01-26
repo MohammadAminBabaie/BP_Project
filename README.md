@@ -101,11 +101,11 @@ This command:
 
 ### ▶️ Run the Program
 ```bash
-./bp_project
+./project
 ```
 (On Windows:)
 ```bash
-bp_project.exe
+project.exe
 ```
 
 ### 🧹 Clean Build Files
