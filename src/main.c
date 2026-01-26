@@ -3,6 +3,7 @@
 #include "csv.h"
 #include "impute.h"
 #include "utils.h"
+#include "plot.h"
 
 int main()
 {
@@ -167,6 +168,23 @@ int main()
         }
         printf("\n");
     }
+
+    printf("\n>>> Exporting plot data...\n");
+
+    export_points(
+        csv,
+        "median_income",
+        "median_house_value",
+        "points.txt");
+
+    generate_gnuplot_script(
+        "points.txt",
+        "plot.gp",
+        "House Prices vs Income",
+        "Median Income",
+        "Median House Value");
+
+    run_gnuplot("plot.gp");
 
     free_csv(csv);
     return 0;
