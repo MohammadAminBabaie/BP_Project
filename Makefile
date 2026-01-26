@@ -5,9 +5,11 @@ SRC = src/main.c \
       src/csv.c \
       src/utils.c \
       src/csv_numeric.c \
-      src/csv_ohe.c
+      src/csv_ohe.c \
+	  src/stats.c \
+	  src/impute.c
 
-OBJ = main.o csv.o utils.o csv_numeric.o csv_ohe.o
+OBJ = main.o csv.o utils.o csv_numeric.o csv_ohe.o stats.o impute.o
 
 TARGET = project.exe
 
@@ -30,6 +32,12 @@ csv_numeric.o: src/csv_numeric.c
 
 csv_ohe.o: src/csv_ohe.c
 	$(CC) $(CFLAGS) -c src/csv_ohe.c
+
+stats.o: src/stats.c
+	$(CC) $(CFLAGS) -c src/stats.c
+
+impute.o: src/impute.c
+	$(CC) $(CFLAGS) -c src/impute.c
 
 clean:
 	del *.o *.exe

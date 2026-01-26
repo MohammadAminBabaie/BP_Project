@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include "config.h"
 #include "csv.h"
+#include "impute.h"
+#include "utils.h"
 
 int main()
 {
@@ -47,7 +49,63 @@ int main()
 
         printf("\n>>> Processing...\n");
 
-        printf("\n>>> 1.Detecting text columns and applying OHE...\n\n");
+        printf(">>> 1.Detecting incomplete rows...\n");
+
+        int incomplete_count = 0;
+
+        for (int i = 0; i < csv->rows; i++)
+        {
+            if (is_row_incomplete(csv, i))
+            {
+                printf("Row %d is incomplete\n", i);
+                incomplete_count++;
+            }
+        }
+
+        printf("Total incomplete rows: %d\n\n", incomplete_count);
+
+        printf(">>> Filling missing values...\n");
+
+        // for (int i = 0; i < csv->cols; i++)
+        // {
+        //     mode_imputation(csv, csv->headers[i]);
+        // }
+
+        // Numeric columns
+        median_imputation(csv, "longitude");
+        median_imputation(csv, "latitude");
+        median_imputation(csv, "housing_median_age");
+        median_imputation(csv, "total_bedrooms");
+        median_imputation(csv, "total_rooms");
+        median_imputation(csv, "population");
+        median_imputation(csv, "households");
+        median_imputation(csv, "median_income");
+        median_imputation(csv, "median_house_value");
+
+        // Categorical columns
+        mode_imputation(csv, "ocean_proximity");
+
+        printf("\n>>> Re-checking incomplete rows after imputation...\n");
+
+        incomplete_count = 0;
+
+        for (int i = 0; i < csv->rows; i++)
+        {
+            if (is_row_incomplete(csv, i))
+            {
+                printf("Row %d is STILL incomplete\n", i);
+                incomplete_count++;
+            }
+        }
+
+        if (incomplete_count == 0)
+            printf("All missing values successfully filled. \n");
+        else
+            printf("Remaining incomplete rows: %d \n", incomplete_count);
+
+        printf("\n>>> 2.Detecting text columns and applying OHE...\n\n");
+
+        printf("Before OHE: rows=%d cols=%d\n", csv->rows, csv->cols);
 
         // int col = 0;
         // while (col < csv->cols)
@@ -66,8 +124,6 @@ int main()
         // }
 
         printf("OHE applied on column: %s\n", "ocean_proximity");
-
-        printf("Before OHE: rows=%d cols=%d\n", csv->rows, csv->cols);
 
         ohe_encode_column(csv, "ocean_proximity");
 

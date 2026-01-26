@@ -39,6 +39,51 @@ int count_columns(const char *line)
     return count;
 }
 
+char *strndup_safe(const char *src, size_t n)
+{
+    if (!src)
+        return strdup("");
+
+    size_t len = strlen(src);
+    if (len > n)
+        len = n;
+
+    char *out = malloc(len + 1);
+    if (!out)
+        return NULL;
+
+    memcpy(out, src, len);
+    out[len] = '\0';
+    return out;
+}
+
+char **parse_csv_row(const char *line, int cols)
+{
+    char **row = malloc(cols * sizeof(char *));
+    int col = 0;
+
+    const char *start = line;
+    const char *p = line;
+
+    while (*p && col < cols)
+    {
+        if (*p == ',')
+        {
+            row[col++] = strndup_safe(start, p - start);
+            start = p + 1;
+        }
+        p++;
+    }
+
+    if (col < cols)
+        row[col++] = strndup_safe(start, p - start);
+
+    while (col < cols)
+        row[col++] = strdup("");
+
+    return row;
+}
+
 CSV *load_csv(const char *filename)
 {
     FILE *file = fopen(filename, "r");
@@ -70,22 +115,7 @@ CSV *load_csv(const char *filename)
     while ((line = read_line(file)))
     {
         csv->data = realloc(csv->data, (csv->rows + 1) * sizeof(char **));
-        csv->data[csv->rows] = malloc(csv->cols * sizeof(char *));
-
-        token = strtok(line, ",\n\r");
-
-        for (int j = 0; j < csv->cols; j++)
-        {
-            if (token)
-            {
-                csv->data[csv->rows][j] = strdup(token);
-                token = strtok(NULL, ",\n\r");
-            }
-            else
-            {
-                csv->data[csv->rows][j] = strdup("");
-            }
-        }
+        csv->data[csv->rows] = parse_csv_row(line, csv->cols);
 
         csv->rows++;
         free(line);

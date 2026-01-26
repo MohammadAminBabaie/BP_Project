@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "csv.h"
+#include "impute.h"
 
 char *strip(char *s)
 {
@@ -41,4 +42,14 @@ int find_column_index(CSV *csv, const char *col_name)
             return i;
     }
     return -1;
+}
+
+int is_row_incomplete(CSV *csv, int row)
+{
+    for (int j = 0; j < csv->cols; j++)
+    {
+        if (is_missing(csv->data[row][j]))
+            return 1;
+    }
+    return 0;
 }
