@@ -7,4 +7,6 @@ int find_column_index(CSV *csv, const char *col_name);
 
 int is_row_incomplete(CSV *csv, int row);
 
+double to_double(const char *s);
+
 #endif

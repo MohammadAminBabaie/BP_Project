@@ -30,7 +30,7 @@ void ohe_encode_column(CSV *csv, const char *col_name)
             }
         }
 
-        if (!found)
+        if (!found && !is_numeric(val))
         {
             char **tmp = realloc(unique, (unique_count + 1) * sizeof(char *));
             if (!tmp)

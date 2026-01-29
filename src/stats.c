@@ -1,5 +1,7 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include "stats.h"
 #include "utils.h"
 #include "impute.h"
@@ -104,4 +106,74 @@ char *calculate_mode(CSV *csv, const char *col_name)
         }
     }
     return mode;
+}
+
+double calculate_variance(CSV *csv, const char *col_name)
+{
+    int col = find_column_index(csv, col_name);
+    if (col < 0)
+        return NAN;
+
+    double mean = 0.0;
+    int count = 0;
+
+    for (int i = 0; i < csv->rows; i++)
+    {
+        double x = to_double(csv->data[i][col]);
+        if (!isnan(x))
+        {
+            mean += x;
+            count++;
+        }
+    }
+
+    if (count == 0)
+        return NAN;
+    mean /= count;
+
+    double var = 0.0;
+    for (int i = 0; i < csv->rows; i++)
+    {
+        double x = to_double(csv->data[i][col]);
+        if (!isnan(x))
+            var += (x - mean) * (x - mean);
+    }
+
+    return var / count;
+}
+
+double calculate_maximum(CSV *csv, const char *col_name)
+{
+    int col = find_column_index(csv, col_name);
+    if (col < 0)
+        return NAN;
+
+    double max = -INFINITY;
+
+    for (int i = 0; i < csv->rows; i++)
+    {
+        double x = to_double(csv->data[i][col]);
+        if (!isnan(x) && x > max)
+            max = x;
+    }
+
+    return max;
+}
+
+double calculate_minimum(CSV *csv, const char *col_name)
+{
+    int col = find_column_index(csv, col_name);
+    if (col < 0)
+        return NAN;
+
+    double min = INFINITY;
+
+    for (int i = 0; i < csv->rows; i++)
+    {
+        double x = to_double(csv->data[i][col]);
+        if (!isnan(x) && x < min)
+            min = x;
+    }
+
+    return min;
 }

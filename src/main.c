@@ -1,9 +1,13 @@
 #include <stdio.h>
+#include <math.h>
+#include <string.h>
 #include "config.h"
 #include "csv.h"
 #include "impute.h"
 #include "utils.h"
 #include "plot.h"
+#include "stats.h"
+#include "feature_engineering.h"
 
 int main()
 {
@@ -104,9 +108,83 @@ int main()
         else
             printf("Remaining incomplete rows: %d \n", incomplete_count);
 
-        printf("\n>>> 2.Detecting text columns and applying OHE...\n\n");
+        printf("\n>>> 2.Feature Engineering...\n");
 
-        printf("Before OHE: rows=%d cols=%d\n", csv->rows, csv->cols);
+        if (find_column_index(csv, "total_rooms") >= 0 &&
+            find_column_index(csv, "households") >= 0)
+        {
+            add_divide_columns(
+                csv,
+                "total_rooms",
+                "households",
+                "rooms_per_household");
+        }
+
+        if (find_column_index(csv, "population") >= 0 &&
+            find_column_index(csv, "households") >= 0)
+        {
+            add_divide_columns(
+                csv,
+                "population",
+                "households",
+                "population_per_household");
+        }
+
+        if (find_column_index(csv, "total_bedrooms") >= 0 &&
+            find_column_index(csv, "total_rooms") >= 0)
+        {
+            add_divide_columns(
+                csv,
+                "total_bedrooms",
+                "total_rooms",
+                "bedrooms_per_room");
+        }
+
+        // if (find_column_index(csv, "latitude") >= 0 &&
+        //     find_column_index(csv, "longitude") >= 0)
+        // {
+        //     add_multiply_columns(
+        //         csv,
+        //         "latitude",
+        //         "longitude",
+        //         "geo_interaction");
+        // }
+
+        remove_column(csv, "total_bedrooms");
+        remove_column(csv, "population");
+        remove_column(csv, "households");
+        remove_column(csv, "total_rooms");
+
+        printf("\n>>> 3.Feature Screening (Variance & Range)...\n");
+
+        for (int col = 0; col < csv->cols; col++)
+        {
+            if (!is_numeric_column(csv, csv->headers[col]) || strcmp(csv->headers[col], TARGET_COL) == 0)
+                continue;
+
+            double var = calculate_variance(csv, csv->headers[col]);
+            double maxv = calculate_maximum(csv, csv->headers[col]);
+            double minv = calculate_minimum(csv, csv->headers[col]);
+            double range = fabs(maxv - minv);
+
+            printf("Column: %-25s | Var = %.6f | Range = %.3f\n", csv->headers[col], var, range);
+
+            if (var < VAR_EPS)
+            {
+                printf(" -> Removing column (near-zero variance)\n");
+                remove_column(csv, csv->headers[col]);
+                col--;
+                continue;
+            }
+
+            if (range > RANGE_LOG_THRESHOLD && minv > 0)
+            {
+                printf(" -> Applying log transform\n");
+                log_transform_column(csv, csv->headers[col]);
+            }
+        }
+
+        printf("\n>>> 4.Detecting text columns and applying OHE...\n\n");
 
         // int col = 0;
         // while (col < csv->cols)
@@ -125,6 +203,8 @@ int main()
         // }
 
         printf("OHE applied on column: %s\n", "ocean_proximity");
+
+        printf("Before OHE: rows=%d cols=%d\n", csv->rows, csv->cols);
 
         ohe_encode_column(csv, "ocean_proximity");
 
@@ -171,20 +251,32 @@ int main()
 
     printf("\n>>> Exporting plot data...\n");
 
-    export_points(
-        csv,
-        "median_income",
-        "median_house_value",
-        "points.txt");
+    for (int col = 0; col < csv->cols; col++)
+    {
+        char buffer[1000];
+        snprintf(buffer, sizeof(buffer), "%s_vs_%s", csv->headers[col], TARGET_COL);
 
-    generate_gnuplot_script(
-        "points.txt",
-        "plot.gp",
-        "House Prices vs Income",
-        "Median Income",
-        "Median House Value");
+        char text_file[1000];
+        snprintf(text_file, sizeof(buffer), "%s.%s", buffer, "txt");
 
-    run_gnuplot("plot.gp");
+        char gp_file[1000];
+        snprintf(gp_file, sizeof(buffer), "%s.%s", buffer, "gp");
+
+        export_points(
+            csv,
+            csv->headers[col],
+            TARGET_COL,
+            text_file);
+
+        generate_gnuplot_script(
+            text_file,
+            gp_file,
+            buffer,
+            csv->headers[col],
+            TARGET_COL);
+
+        // run_gnuplot(gp_file);
+    }
 
     free_csv(csv);
     return 0;

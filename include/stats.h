@@ -9,4 +9,8 @@ char *calculate_mode(CSV *csv, const char *col_name);
 
 int count_missing(CSV *csv, const char *col_name);
 
+double calculate_variance(CSV *csv, const char *col_name);
+double calculate_maximum(CSV *csv, const char *col_name);
+double calculate_minimum(CSV *csv, const char *col_name);
+
 #endif

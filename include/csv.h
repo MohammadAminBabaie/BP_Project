@@ -16,4 +16,8 @@ void free_csv(CSV *csv);
 int is_numeric_column(CSV *csv, const char *col_name);
 void ohe_encode_column(CSV *csv, const char *col_name);
 
+// Column management
+void add_column(CSV *csv, const char *col_name);
+void remove_column(CSV *csv, const char *col_name);
+
 #endif

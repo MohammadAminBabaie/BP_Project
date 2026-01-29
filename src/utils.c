@@ -1,5 +1,7 @@
-#include <string.h>
+#include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <math.h>
 #include <ctype.h>
 #include "csv.h"
 #include "impute.h"
@@ -52,4 +54,9 @@ int is_row_incomplete(CSV *csv, int row)
             return 1;
     }
     return 0;
+}
+
+double to_double(const char *s)
+{
+    return (s && *s) ? atof(s) : NAN;
 }

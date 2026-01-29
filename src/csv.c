@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "csv.h"
+#include "utils.h"
 
 char *read_line(FILE *file)
 {
@@ -171,4 +172,42 @@ void free_csv(CSV *csv)
 
     free(csv->data);
     free(csv);
+}
+
+void add_column(CSV *csv, const char *col_name)
+{
+    csv->headers = realloc(csv->headers, (csv->cols + 1) * sizeof(char *));
+    csv->headers[csv->cols] = strdup(col_name);
+
+    for (int i = 0; i < csv->rows; i++)
+    {
+        csv->data[i] = realloc(csv->data[i], (csv->cols + 1) * sizeof(char *));
+        csv->data[i][csv->cols] = strdup("");
+    }
+
+    csv->cols++;
+
+    printf(" Add %s column.\n", col_name);
+}
+
+void remove_column(CSV *csv, const char *col_name)
+{
+    int col = find_column_index(csv, col_name);
+    if (col < 0)
+        return;
+
+    free(csv->headers[col]);
+    for (int i = col; i < csv->cols - 1; i++)
+        csv->headers[i] = csv->headers[i + 1];
+
+    for (int i = 0; i < csv->rows; i++)
+    {
+        free(csv->data[i][col]);
+        for (int j = col; j < csv->cols - 1; j++)
+            csv->data[i][j] = csv->data[i][j + 1];
+    }
+
+    csv->cols--;
+
+    printf(" Remove %s column.\n", col_name);
 }
