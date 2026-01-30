@@ -9,9 +9,10 @@ SRC = src/main.c \
 	  src/stats.c \
 	  src/impute.c \
 	  src/plot.c \
-	  src/feature_engineering.c
+	  src/feature_engineering.c \
+	  src/scaling.c
 
-OBJ = main.o csv.o utils.o csv_numeric.o csv_ohe.o stats.o impute.o plot.o feature_engineering.o
+OBJ = main.o csv.o utils.o csv_numeric.o csv_ohe.o stats.o impute.o plot.o feature_engineering.o scaling.o
 
 TARGET = project.exe
 
@@ -46,6 +47,9 @@ plot.o: src/plot.c
 
 feature_engineering.o: src/feature_engineering.c
 	$(CC) $(CFLAGS) -c src/feature_engineering.c
+
+scaling.o: src/scaling.c
+	$(CC) $(CFLAGS) -c src/scaling.c
 
 clean:
 	del *.o *.exe

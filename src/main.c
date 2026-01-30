@@ -8,6 +8,7 @@
 #include "plot.h"
 #include "stats.h"
 #include "feature_engineering.h"
+#include "scaling.h"
 
 int main()
 {

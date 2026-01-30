@@ -29,6 +29,8 @@ int count_missing(CSV *csv, const char *col_name)
 double calculate_mean(CSV *csv, const char *col_name)
 {
     int col = find_column_index(csv, col_name);
+    if (col < 0)
+        return NAN;
 
     double sum = 0;
     int count = 0;
@@ -49,6 +51,8 @@ double calculate_mean(CSV *csv, const char *col_name)
 double calculate_median(CSV *csv, const char *col_name)
 {
     int col = find_column_index(csv, col_name);
+    if (col < 0)
+        return NAN;
 
     double *vals = malloc(csv->rows * sizeof(double));
     int n = 0;
@@ -82,6 +86,8 @@ double calculate_median(CSV *csv, const char *col_name)
 char *calculate_mode(CSV *csv, const char *col_name)
 {
     int col = find_column_index(csv, col_name);
+    if (col < 0)
+        return;
 
     int max_count = 0;
     char *mode = NULL;
@@ -176,4 +182,65 @@ double calculate_minimum(CSV *csv, const char *col_name)
     }
 
     return min;
+}
+
+double calculate_quartile(CSV *csv, const char *col_name, double q)
+{
+    if (q < 0.0 || q > 1.0)
+        return NAN;
+
+    int col = find_column_index(csv, col_name);
+    if (col < 0)
+        return NAN;
+
+    double *vals = malloc(csv->rows * sizeof(double));
+    int n = 0;
+
+    for (int i = 0; i < csv->rows; i++)
+    {
+        if (!is_missing(csv->data[i][col]) &&
+            is_numeric(csv->data[i][col]))
+        {
+
+            vals[n++] = atof(csv->data[i][col]);
+        }
+    }
+
+    if (n == 0)
+    {
+        free(vals);
+        return NAN;
+    }
+
+    qsort(vals, n, sizeof(double), cmp_double);
+
+    double pos = q * (n - 1);
+    int idx = (int)pos;
+    double frac = pos - idx;
+
+    double result;
+    if (idx + 1 < n)
+        result = vals[idx] * (1 - frac) + vals[idx + 1] * frac;
+    else
+        result = vals[idx];
+
+    free(vals);
+    return result;
+}
+
+double calculate_std_deviation(CSV *csv, const char *col_name)
+{
+    int col = find_column_index(csv, col_name);
+    if (col < 0)
+        return NAN;
+
+    double variance = calculate_variance(csv, col_name);
+
+    if (isnan(variance))
+        return NAN;
+
+    if (variance < 0)
+        variance = 0;
+
+    return sqrt(variance);
 }
