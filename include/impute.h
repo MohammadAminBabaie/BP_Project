@@ -3,8 +3,6 @@
 
 #include "csv.h"
 
-int is_missing(const char *s);
-
 void mean_imputation(CSV *csv, const char *col_name);
 void median_imputation(CSV *csv, const char *col_name);
 void mode_imputation(CSV *csv, const char *col_name);

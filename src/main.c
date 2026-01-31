@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <math.h>
+#include <stdlib.h>
 #include <string.h>
 #include "config.h"
 #include "csv.h"
@@ -9,6 +10,30 @@
 #include "stats.h"
 #include "feature_engineering.h"
 #include "scaling.h"
+#include "metrics.h"
+#include "split.h"
+
+void print_split_info(const char *title, MLDataSplit split)
+{
+    printf("\n==== %s ====\n", title);
+    printf("Train size: %d\n", split.train_size);
+    printf("Test  size: %d\n", split.test_size);
+
+    printf("\nFeatures (x_train headers):\n");
+    for (int i = 0; i < split.x_train->cols; i++)
+        printf("%s ", split.x_train->headers[i]);
+    printf("\n");
+
+    printf("\nFirst train sample:\n");
+    for (int j = 0; j < split.x_train->cols; j++)
+        printf("%s ", split.x_train->data[0][j]);
+    printf(" -> y = %.2f\n", split.y_train[0]);
+
+    printf("\nFirst test sample:\n");
+    for (int j = 0; j < split.x_test->cols; j++)
+        printf("%s ", split.x_test->data[0][j]);
+    printf(" -> y = %.2f\n", split.y_test[0]);
+}
 
 int main()
 {
@@ -278,6 +303,29 @@ int main()
 
         // run_gnuplot(gp_file);
     }
+
+    printf("\n>>> Spliting data(train and test)...\n");
+
+    // Random Train/Test Split
+    MLDataSplit random_split = train_test_split(csv, TARGET_COL, 0.2);
+
+    print_split_info("Random Train/Test Split", random_split);
+
+    // Stratified Split
+    MLDataSplit strat_split = stratified_split(csv, TARGET_COL, 0.2);
+
+    print_split_info("Stratified Split", strat_split);
+
+    // Cleanup
+    free_csv(random_split.x_train);
+    free_csv(random_split.x_test);
+    free(random_split.y_train);
+    free(random_split.y_test);
+
+    free_csv(strat_split.x_train);
+    free_csv(strat_split.x_test);
+    free(strat_split.y_train);
+    free(strat_split.y_test);
 
     free_csv(csv);
     return 0;

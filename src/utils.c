@@ -6,6 +6,24 @@
 #include "csv.h"
 #include "impute.h"
 
+int is_missing(const char *s)
+{
+    if (!s || *s == '\0')
+        return 1;
+
+    const char *missing[] = {
+        "NA", "NaN", "N/A", "?", "-", "null", " "};
+
+    for (int i = 0; i < 6; i++)
+        if (strcmp(s, missing[i]) == 0)
+            return 1;
+
+    if (strcmp(s, "-999") == 0)
+        return 1;
+
+    return 0;
+}
+
 char *strip(char *s)
 {
     if (!s)

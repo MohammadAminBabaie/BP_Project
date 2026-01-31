@@ -211,3 +211,57 @@ void remove_column(CSV *csv, const char *col_name)
 
     printf(" Remove %s column.\n", col_name);
 }
+
+void copy_headers_except(CSV *dest, CSV *src, const char *target)
+{
+    int tcol = find_column_index(src, target);
+    int d = 0;
+
+    for (int i = 0; i < src->cols; i++)
+    {
+        if (i == tcol)
+            continue;
+        dest->headers[d++] = strdup(src->headers[i]);
+    }
+}
+
+CSV *create_empty_csv(int feat_count)
+{
+    CSV *csv = malloc(sizeof(CSV));
+    if (!csv)
+        return NULL;
+
+    csv->rows = 0;
+    csv->cols = feat_count;
+
+    csv->headers = malloc(feat_count * sizeof(char *));
+    for (int i = 0; i < feat_count; i++)
+        csv->headers[i] = NULL;
+
+    csv->data = NULL;
+    return csv;
+}
+
+void append_row(CSV *csv, char **row, int col_count)
+{
+    if (!csv || !row || col_count != csv->cols)
+        return;
+
+    csv->data = realloc(csv->data, (csv->rows + 1) * sizeof(char **));
+    if (!csv->data)
+        return;
+
+    csv->data[csv->rows] = malloc(col_count * sizeof(char *));
+    if (!csv->data[csv->rows])
+        return;
+
+    for (int j = 0; j < col_count; j++)
+    {
+        if (row[j])
+            csv->data[csv->rows][j] = strdup(row[j]);
+        else
+            csv->data[csv->rows][j] = strdup("");
+    }
+
+    csv->rows++;
+}

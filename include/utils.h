@@ -9,4 +9,6 @@ int is_row_incomplete(CSV *csv, int row);
 
 double to_double(const char *s);
 
+int is_missing(const char *s);
+
 #endif

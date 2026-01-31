@@ -5,24 +5,6 @@
 #include "stats.h"
 #include "utils.h"
 
-int is_missing(const char *s)
-{
-    if (!s || *s == '\0')
-        return 1;
-
-    const char *missing[] = {
-        "NA", "NaN", "N/A", "?", "-", "null", " "};
-
-    for (int i = 0; i < 6; i++)
-        if (strcmp(s, missing[i]) == 0)
-            return 1;
-
-    if (strcmp(s, "-999") == 0)
-        return 1;
-
-    return 0;
-}
-
 void mean_imputation(CSV *csv, const char *col_name)
 {
     int col = find_column_index(csv, col_name);

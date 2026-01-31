@@ -86,8 +86,6 @@ double calculate_median(CSV *csv, const char *col_name)
 char *calculate_mode(CSV *csv, const char *col_name)
 {
     int col = find_column_index(csv, col_name);
-    if (col < 0)
-        return;
 
     int max_count = 0;
     char *mode = NULL;
