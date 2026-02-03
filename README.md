@@ -50,25 +50,37 @@ bp-project/
 │ └── processed/ # Preprocessed data
 │
 ├── include/ # Header files (.h)
-│ ├── data.h
 │ ├── config.h
 │ ├── csv.h
+│ ├── feature_engineering.h
+│ ├── impute.h
+│ ├── linear_regression.h
+│ ├── metrics.h
+│ ├── plot.h
+│ ├── scaling.h
+│ ├── split.h
 │ ├── stats.h
-│ ├── preprocess.h
-│ └── model.h
+│ └── utils.h
 │
 ├── src/ # Source files (.c)
-│ ├── main.c
+│ ├── csv_numeric.c
+│ ├── csv_ohe.c
 │ ├── csv.c
+│ ├── feature_engineering.c
+│ ├── impute.c
+│ ├── linear_regression.c
+│ ├── main.c
+│ ├── metrics.c
+│ ├── plot.c
+│ ├── scaling.c
+│ ├── split.c
 │ ├── stats.c
-│ ├── preprocess.c
-│ └── model.c
+│ └── utils.c
 │
-├── plots/ # Gnuplot scripts & outputs
+├── plots/ # Gnuplot scripts & outputs (.gp)
 │
 ├── Makefile
-├── README.md
-└── report.pdf # Final academic report
+└── README.md
 
 ```
 

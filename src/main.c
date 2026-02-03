@@ -12,6 +12,7 @@
 #include "scaling.h"
 #include "metrics.h"
 #include "split.h"
+#include "linear_regression.h"
 
 void print_split_info(const char *title, MLDataSplit split)
 {
@@ -32,7 +33,7 @@ void print_split_info(const char *title, MLDataSplit split)
     printf("\nFirst test sample:\n");
     for (int j = 0; j < split.x_test->cols; j++)
         printf("%s ", split.x_test->data[0][j]);
-    printf(" -> y = %.2f\n", split.y_test[0]);
+    printf(" -> y = %.2f\n\n", split.y_test[0]);
 }
 
 int main()
@@ -304,17 +305,149 @@ int main()
         // run_gnuplot(gp_file);
     }
 
+    printf("\n>>> Data normalization...\n");
+
+    for (int col = 0; col < csv->cols; col++)
+    {
+        if (strcmp(csv->headers[col], TARGET_COL) != 0)
+            standardize_column(csv, csv->headers[col]);
+        // robust_scale_column(csv, csv->headers[col]);
+        // min_max_scale_column(csv, csv->headers[col]);
+    }
+
+    double learning_rates[] = {0.001, 0.01, 0.05, 0.1};
+    int lr_count = sizeof(learning_rates) / sizeof(double);
+
+    int epochs = 1000;
+
     printf("\n>>> Spliting data(train and test)...\n");
 
     // Random Train/Test Split
     MLDataSplit random_split = train_test_split(csv, TARGET_COL, 0.2);
 
+    // save_csv("x_test.csv", random_split.x_test);
+    // save_csv("x_train.csv", random_split.x_train);
+    // save_csv("y_test.csv", random_split.y_test);
+    // save_csv("y_train.csv", random_split.y_train);
+
     print_split_info("Random Train/Test Split", random_split);
+
+    for (int i = 0; i < lr_count; i++)
+    {
+        double lr = learning_rates[i];
+
+        printf("=====================================\n");
+        printf("Training with learning rate = %.4f\n", lr);
+        printf("=====================================\n\n");
+
+        LinearModel model = train_linear_regression(
+            random_split.x_train,
+            random_split.y_train,
+            random_split.train_size,
+            lr,
+            epochs);
+
+        printf("Weights:\n");
+        for (int i = 0; i < random_split.x_train->cols; i++)
+        {
+            printf("[%s]:%.6f ", random_split.x_train->headers[i], model.weights[i]);
+        }
+        printf("\nBias: %.6f\n", model.bias);
+
+        double *y_train_pred = linear_regression_predict(
+            random_split.x_train,
+            model.weights,
+            model.bias);
+
+        double *y_test_pred = linear_regression_predict(
+            random_split.x_test,
+            model.weights,
+            model.bias);
+
+        double train_mse = mse(random_split.y_train, y_train_pred, random_split.train_size);
+        double train_mae = mae(random_split.y_train, y_train_pred, random_split.train_size);
+        double train_mape = mape(random_split.y_train, y_train_pred, random_split.train_size);
+
+        double test_mse = mse(random_split.y_test, y_test_pred, random_split.test_size);
+        double test_mae = mae(random_split.y_test, y_test_pred, random_split.test_size);
+        double test_mape = mape(random_split.y_test, y_test_pred, random_split.test_size);
+
+        printf("TRAIN METRICS:\n");
+        printf("  MSE  = %.4f\n", train_mse);
+        printf("  MAE  = %.4f\n", train_mae);
+        printf("  MAPE = %.2f %%\n\n", train_mape);
+
+        printf("TEST METRICS:\n");
+        printf("  MSE  = %.4f\n", test_mse);
+        printf("  MAE  = %.4f\n", test_mae);
+        printf("  MAPE = %.2f %%\n\n", test_mape);
+
+        free(y_train_pred);
+        free(y_test_pred);
+        free(model.weights);
+    }
+
+    printf("\n=========================================================================================================\n");
 
     // Stratified Split
     MLDataSplit strat_split = stratified_split(csv, TARGET_COL, 0.2);
 
-    print_split_info("Stratified Split", strat_split);
+    print_split_info("Stratified Train/Test Split", strat_split);
+
+    for (int i = 0; i < lr_count; i++)
+    {
+        double lr = learning_rates[i];
+
+        printf("=====================================\n");
+        printf("Training with learning rate = %.4f\n", lr);
+        printf("=====================================\n");
+
+        LinearModel model = train_linear_regression(
+            strat_split.x_train,
+            strat_split.y_train,
+            strat_split.train_size,
+            lr,
+            epochs);
+
+        printf("Weights:\n");
+        for (int i = 0; i < random_split.x_train->cols; i++)
+        {
+            printf("[%s]:%.6f ", random_split.x_train->headers[i], model.weights[i]);
+        }
+        printf("\nBias: %.6f\n", model.bias);
+
+        double *y_train_pred = linear_regression_predict(
+            strat_split.x_train,
+            model.weights,
+            model.bias);
+
+        double *y_test_pred = linear_regression_predict(
+            strat_split.x_test,
+            model.weights,
+            model.bias);
+
+        double train_mse = mse(strat_split.y_train, y_train_pred, strat_split.train_size);
+        double train_mae = mae(strat_split.y_train, y_train_pred, strat_split.train_size);
+        double train_mape = mape(strat_split.y_train, y_train_pred, strat_split.train_size);
+
+        double test_mse = mse(strat_split.y_test, y_test_pred, strat_split.test_size);
+        double test_mae = mae(strat_split.y_test, y_test_pred, strat_split.test_size);
+        double test_mape = mape(strat_split.y_test, y_test_pred, strat_split.test_size);
+
+        printf("TRAIN METRICS:\n");
+        printf("  MSE  = %.4f\n", train_mse);
+        printf("  MAE  = %.4f\n", train_mae);
+        printf("  MAPE = %.2f %%\n\n", train_mape);
+
+        printf("TEST METRICS:\n");
+        printf("  MSE  = %.4f\n", test_mse);
+        printf("  MAE  = %.4f\n", test_mae);
+        printf("  MAPE = %.2f %%\n\n", test_mape);
+
+        free(y_train_pred);
+        free(y_test_pred);
+        free(model.weights);
+    }
 
     // Cleanup
     free_csv(random_split.x_train);
