@@ -13,6 +13,7 @@
 #include "metrics.h"
 #include "split.h"
 #include "linear_regression.h"
+#include "outlier.h"
 
 void print_split_info(const char *title, MLDataSplit split)
 {
@@ -181,6 +182,8 @@ int main()
         remove_column(csv, "population");
         remove_column(csv, "households");
         remove_column(csv, "total_rooms");
+        // remove_column(csv, "longitude");
+        // remove_column(csv, "latitude");
 
         printf("\n>>> 3.Feature Screening (Variance & Range)...\n");
 
@@ -276,6 +279,16 @@ int main()
         printf("\n");
     }
 
+    printf("\n>>>  Removing outliers...\n");
+
+    remove_outliers_iqr_inplace(csv, "longitude", 1.5);
+    remove_outliers_iqr_inplace(csv, "latitude", 1.5);
+    remove_outliers_iqr_inplace(csv, "housing_median_age", 1.5);
+    remove_outliers_iqr_inplace(csv, "median_income", 1.5);
+    remove_outliers_iqr_inplace(csv, "rooms_per_household", 1.5);
+    remove_outliers_iqr_inplace(csv, "log_population_per_household", 1.5);
+    remove_outliers_iqr_inplace(csv, "bedrooms_per_room", 1.5);
+
     printf("\n>>> Exporting plot data...\n");
 
     for (int col = 0; col < csv->cols; col++)
@@ -310,12 +323,12 @@ int main()
     for (int col = 0; col < csv->cols; col++)
     {
         if (strcmp(csv->headers[col], TARGET_COL) != 0)
-            standardize_column(csv, csv->headers[col]);
-        // robust_scale_column(csv, csv->headers[col]);
+            // standardize_column(csv, csv->headers[col]);
+            robust_scale_column(csv, csv->headers[col]);
         // min_max_scale_column(csv, csv->headers[col]);
     }
 
-    double learning_rates[] = {0.001, 0.01, 0.05, 0.1};
+    double learning_rates[] = {0.001, 0.01, 0.05, 0.1, 0.5};
     int lr_count = sizeof(learning_rates) / sizeof(double);
 
     int epochs = 1000;

@@ -56,6 +56,7 @@ bp-project/
 │ ├── impute.h
 │ ├── linear_regression.h
 │ ├── metrics.h
+│ ├── outlier.h
 │ ├── plot.h
 │ ├── scaling.h
 │ ├── split.h
@@ -71,6 +72,7 @@ bp-project/
 │ ├── linear_regression.c
 │ ├── main.c
 │ ├── metrics.c
+│ ├── outlier.c
 │ ├── plot.c
 │ ├── scaling.c
 │ ├── split.c

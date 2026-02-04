@@ -13,9 +13,10 @@ SRC = src/main.c \
 	  src/scaling.c \
 	  src/split.c \
 	  src/metrics.c \
-	  linear_regression.c
+	  linear_regression.c \
+	  outlier.c
 
-OBJ = main.o csv.o utils.o csv_numeric.o csv_ohe.o stats.o impute.o plot.o feature_engineering.o scaling.o metrics.o split.o linear_regression.o
+OBJ = main.o csv.o utils.o csv_numeric.o csv_ohe.o stats.o impute.o plot.o feature_engineering.o scaling.o metrics.o split.o linear_regression.o outlier.o
 
 TARGET = project.exe
 
@@ -62,6 +63,9 @@ metrics.o: src/metrics.c
 
 linear_regression.o: src/linear_regression.c
 	$(CC) $(CFLAGS) -c src/linear_regression.c	
+
+outlier.o: src/outlier.c
+	$(CC) $(CFLAGS) -c src/outlier.c	
 
 clean:
 	del *.o *.exe
